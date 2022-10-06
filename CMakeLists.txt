@@ -21,6 +21,7 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -51,7 +52,15 @@ target_link_libraries(qualisys_node
   ${ament_LIBRARIES}
   ${rclcpp_LIBARIES}
 )
-ament_target_dependencies(qualisys_node rclcpp tf2 geometry_msgs nav_msgs)
+ament_target_dependencies(
+  qualisys_node 
+  rclcpp 
+  rclcpp_components
+  tf2
+  tf2_ros
+  geometry_msgs 
+  nav_msgs
+)
 
 install(TARGETS
   qualisys_node

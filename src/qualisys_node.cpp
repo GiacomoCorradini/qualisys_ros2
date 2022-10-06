@@ -32,7 +32,7 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
 
     std::string server = "192.168.123.2";
-    double rate_limit = 200;
+    double rate_limit = 200; // hz
     std::string parent_frame = "map";
     int slow_count = 0;
 
