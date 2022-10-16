@@ -6,6 +6,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
+#include <rclcpp/executor.hpp>
 
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -31,8 +32,8 @@ private:
 
     rclcpp::TimerBase::SharedPtr timer_;
 
-    std::string server = "192.168.123.2";
-    double rate_limit = 200; // hz
+    std::string server = "192.168.1.2"; // mocap server ip
+    double rate_limit = 100;  // hz
     std::string parent_frame = "map";
     int slow_count = 0;
 
@@ -49,13 +50,26 @@ private:
 
     const int queue_size = 1;
     
-public: 
+public:
     QualisysNode()
-    : Node("qualisys_node")
-    {
+    : Node ("qualisys_node")
+    {       
         RCLCPP_INFO(this->get_logger(), "qualisys node is created");
         auto interval = std::chrono::duration<double>(1/rate_limit);
         RCLCPP_INFO(this->get_logger(), "Interval set at: %g", interval.count());
+        // tf_br_ = std::make_shared<tf2_ros::TransformBroadcaster>(shared_from_this());
+
+        timer_ = this->create_wall_timer(interval, std::bind(&QualisysNode::run, this));
+    }
+
+    // Setting rate_limit and server ip address
+    QualisysNode(double rate_limit, std::string server_str)
+    : Node("qualisys_node")
+    {
+        server = server_str;
+        RCLCPP_INFO(this->get_logger(), "qualisys node is created");
+        auto interval = std::chrono::duration<double>(1/rate_limit);
+        RCLCPP_INFO(this->get_logger(), "Interval set at: %g Hz | %g seconds", rate_limit, interval.count());
         // tf_br_ = std::make_shared<tf2_ros::TransformBroadcaster>(shared_from_this());
 
         timer_ = this->create_wall_timer(interval, std::bind(&QualisysNode::run, this));
@@ -73,7 +87,7 @@ public:
         try
         {
             if (!rtProtocol.Connected())
-            {
+            {                
                 if (!rtProtocol.Connect(server.c_str(), basePort, &udpPort, majorVersion, minorVersion, bigEndian))
                 {
                     RCLCPP_WARN(this->get_logger(),"rtProtocol.Connect: %s\n\n", rtProtocol.GetErrorString());
@@ -227,7 +241,29 @@ public:
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    auto qualisys_node = std::make_shared<QualisysNode>();
+
+    double rate_limit;
+    std::string server;
+
+    for (int i = 0; i < argc; i++)
+    {
+        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "%s", argv[i]);
+        if (std::string(argv[i]) == std::string("--rate"))
+        {
+            rate_limit = std::atof(argv[i+1]);
+            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "rate set at %g", rate_limit);
+            i++;
+        }
+        else if (std::string(argv[i]) == "--server")
+        {
+            server = std::string(argv[i+1]);
+            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "server ip set at: %s", server.c_str());
+            i++;
+        }
+        
+    }
+
+    auto qualisys_node = std::make_shared<QualisysNode>(rate_limit, server);
     rclcpp::spin(qualisys_node);
     return 0;
 }   
