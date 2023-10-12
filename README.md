@@ -1,23 +1,25 @@
-# qualisys_ros
-ROS2 package for Qualisys motion capture system.
+# qualisys_ros2
 
-outputs `rigid_body/pose`
+ROS2 package for Qualisys motion capture system ([original repository](https://github.com/zp-yang/qualisys_ros)).
 
-***
-Move this project(folder) under your ros2 workspace `src` folder
+the output is a ros2 topic: `rigid_body/pose`
 
-`ros2_ws/src/qualisys_ros/`
+## Build the package
 
-To build the package, move to `ros_ws/` and do 
+Build the package:
 
-`colcon build --packages-select qualisys_ros`
+```bash
+colcon build --packages-select qualisys_ros
+```
 
-To source the package, move to `ros_ws/`
+To source the package:
 
-`. install/setup.bash`
+```bash
+. install/setup.bash
+```
 
-***
-To run the node, use 
-`ros2 launch qualisys_ros mocap.launch.py`
+## How to use the node
+
+To run the node, type: `ros2 launch qualisys_ros mocap.launch.py`
 
 Change the `--server` (ip addr) and `--rate` (hz) arguments in the launch script to match your system.
